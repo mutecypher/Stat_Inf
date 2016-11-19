@@ -1,0 +1,108 @@
+---
+title: "ToothGrowth"
+author: "Michael Pearson"
+date: "August 14, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Tooth Growth
+
+The description of the data set "Tooth Growth":
+
+<b>The Effect of Vitamin C on Tooth Growth in Guinea Pigs</b>
+
+Description
+
+The response is the length of odontoblasts (cells responsible for tooth growth) in 60 guinea pigs. Each animal received one of three dose levels of vitamin C (0.5, 1, and 2 mg/day) by one of two delivery methods, (orange juice or ascorbic acid (a form of vitamin C and coded as VC).
+
+Usage
+
+ToothGrowth
+Format
+
+A data frame with 60 observations on 3 variables.
+
+[,1]	len	numeric	Tooth length
+[,2]	supp	factor	Supplement type (VC or OJ).
+[,3]	dose	numeric	Dose in milligrams/day
+
+
+```{r loading libraries and data ,include = FALSE}
+library(UsingR)
+library(reshape2)
+library(gridExtra)
+data("ToothGrowth")
+```
+
+## What to look for
+
+Based on the description of the data, we want to see if there is a relationship between the lenght of the odontoblasts and the delivery method and the dosage of vitamin C. So our dependent variable is "len", the length.
+
+## Looking at delivery methods
+
+Let's make some plots of the data
+
+```{r subsetting into delivery methods, include = TRUE}
+ OJ <- data.frame(subset(ToothGrowth, supp == "OJ"))
+ VC <- data.frame(subset(ToothGrowth, supp == "VC"))
+ poj <- ggplot(OJ, aes(dose, len))
+ poj <- poj + geom_point()
+ poj <- poj +  xlab("Dosage of vitamin C in mg/day") +  ylab("length of odontblasts") + ggtitle("Orange juice")
+ pvc <- ggplot(VC, aes(dose, len))
+ pvc <- pvc + geom_point()
+ pvc <- pvc + xlab("Dosage of vitamin C in mg/day") +  ylab("length of odontblasts") + ggtitle("Ascorbic acid")
+ grid.arrange(poj, pvc, ncol = 2)
+```
+
+## Quick Conclusions
+
+We can see that in both cases, an increase in dosage of vitamin C appears to increase the length of odontblasts.
+
+##Looking at dosage
+```{r subsetting into dossage and looking at 0.5 mg/day first}
+allover <- ggplot(ToothGrowth, aes(dose, len, color=factor(supp)))
+allover <- allover + geom_point() + scale_color_manual(values = c("green", "red"))
+allover
+summary(ToothGrowth)
+p5 <- subset(ToothGrowth, ToothGrowth$dose == 0.5)
+b5 <- t.test(len ~ supp, paired = FALSE, var.equal = TRUE, data = p5)
+b5
+```
+
+## Hypothesis testing
+
+Is there a difference in growth between delivery methods? We state our null hypothesis as: There is no significant difference in the lengths of hamster odontoblasts when equal doses of Vitamin C are given via orange juice versus the same dose given via ascorbic acid.
+
+Here's what we see when we compare the lenght of the odontoblasts at a dose of 0.5 mg/day 
+
+##For 0.5 mg/day
+Based on the p-value of <b>`r b5$p.value`</b> we can reject the hypothesis that there is no difference in the growth of the odontoblasts at a dosage of <b> 0.5 mg/day</b> when comparing the delivery method of <b>Orange Juice</b> compared to <b>Ascorbic Acid</b>. The odontoblasts are larger when the dose is given in Orange Juice.
+
+
+```{r looking at 1.0 mg/day }
+p10 <- subset(ToothGrowth, ToothGrowth$dose == 1.0)
+b10 <- t.test(len ~ supp, paired = FALSE, var.equal = TRUE, data = p10)
+b10
+```
+
+##For 1.0 mg/day
+
+Based on the p-value of <b>`r b10$p.value`</b> we can reject the hypothesis that there is no difference in the growth of the odontoblasts at a dosage of <b> 1.0 mg/day</b> when comparing the delivery method of <b>Orange Juice</b> compared to <b>Ascorbic Acid</b>. The odontoblasts are larger when the dose is given in Orange Juice.
+```{r and lastly for 2.0 mg/day}
+p20 <- subset(ToothGrowth, ToothGrowth$dose == 2.0)
+b20 <- t.test(len ~ supp, paired = FALSE, var.equal = TRUE, data = p20)
+b20
+```
+
+##For 2.0 mg/day
+
+Based on the p-value of <b>`r b20$p.value`</b> we must accept the hypothesis that there is no difference in the growth of the odontoblasts at a dosage of <b> 2.0 mg/day</b> when comparing the delivery method of <b>Orange Juice</b> compared to <b>Ascorbic Acid</b>. There is no statistically meaningful difference in the size of the odontoblasts when the dosage is 2.0mg/day.
+
+
+## Conclusion
+
+At lower dosages, using orange juice as the delivery method will result in longer odontoblasts in hamsters as compared to ascorbic acid. But at the highest measured dosage of 2.0 mg/day, there was no difference in the delivery method  - but the length of the odontoblasts did continue to increase with dosage.
